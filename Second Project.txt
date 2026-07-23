@@ -1,0 +1,296 @@
+#include <iostream>
+#include <string>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+// Enums
+enum enOperationType { Add = 1, Sub = 2, Mult = 3, Div = 4, Mix = 5 };
+enum enQuestionLevel { Easy = 1, Mid = 2, Hard = 3, MixLevelChoice = 4 };
+enum enCorrectWrong { Correct = 1, Wrong = 2 };
+enum enPassFail { Pass = 1, Fail = 2 };
+
+// Structures
+struct stMathMatter
+{
+    int FirstPart = 0;
+    int SecondPart = 0;
+    int YourAnswer = 0;
+    int CorrectAnswer = 0;
+    enOperationType OperationType;
+    enQuestionLevel QuestionLevel;
+    enCorrectWrong CorrectWrong;
+};
+
+struct stGameResult
+{
+    short NumberOfQuestions = 0;
+    short NumberOfCorrectAnswers = 0;
+    short NumberOfWrongAnswers = 0;
+    enQuestionLevel QuestionLevel;
+    enOperationType OperationType;
+    enPassFail PassFail;
+};
+
+// Helper Functions
+string OperationTypeName(enOperationType OperationType)
+{
+    string arrGameOperationType[5] = { "Addition", "Subtraction", "Multiplication", "Division", "Mix" };
+    return arrGameOperationType[OperationType - 1];
+}
+
+string QuestionLevelName(enQuestionLevel QuestionLevel)
+{
+    string arrGameQuestionLevel[4] = { "Easy", "Mid", "Hard", "Mix" };
+    return arrGameQuestionLevel[QuestionLevel - 1];
+}
+
+char OperationtypeSymbol(enOperationType OperationType)
+{
+    switch (OperationType)
+    {
+    case enOperationType::Add:
+        return '+';
+    case enOperationType::Sub:
+        return '-';
+    case enOperationType::Mult:
+        return '*';
+    case enOperationType::Div:
+        return '/';
+    default:
+        return '?';
+    }
+}
+
+void ResetScreen()
+{
+    system("cls");
+    system("color 07"); // Default terminal color
+}
+
+int GetRandomNumber(int From, int To)
+{
+    return rand() % (To - From + 1) + From;
+}
+
+short ReadHowManyQuestion()
+{
+    short Questions = 0;
+    do
+    {
+        cout << "How many questions do you want? ";
+        cin >> Questions;
+    } while (Questions <= 0);
+    return Questions;
+}
+
+enQuestionLevel ReadQuestionLevel()
+{
+    short Qslevel;
+    do
+    {
+        cout << "Enter questions level: [1] Easy, [2] Mid, [3] Hard, [4] Mix: ";
+        cin >> Qslevel;
+    } while (Qslevel < 1 || Qslevel > 4);
+    return (enQuestionLevel)Qslevel;
+}
+
+enOperationType ReadOperationType()
+{
+    short OperationType;
+    do
+    {
+        cout << "Enter operation type: [1] Addition, [2] Subtraction, [3] Multiplication, [4] Division, [5] Mix: ";
+        cin >> OperationType;
+    } while (OperationType < 1 || OperationType > 5);
+    return (enOperationType)OperationType;
+}
+
+int ReadAnswer()
+{
+    int Answer;
+    cin >> Answer;
+    return Answer;
+}
+
+enOperationType MixChoice()
+{
+    return (enOperationType)GetRandomNumber(1, 4);
+}
+
+enQuestionLevel MixLevel()
+{
+    return (enQuestionLevel)GetRandomNumber(1, 3);
+}
+
+int QuestionRightAnswer(stMathMatter MathMatter)
+{
+    switch (MathMatter.OperationType)
+    {
+    case enOperationType::Add:
+        return MathMatter.FirstPart + MathMatter.SecondPart;
+    case enOperationType::Sub:
+        return MathMatter.FirstPart - MathMatter.SecondPart;
+    case enOperationType::Mult:
+        return MathMatter.FirstPart * MathMatter.SecondPart;
+    case enOperationType::Div:
+        return MathMatter.FirstPart / MathMatter.SecondPart;
+    default:
+        return 0;
+    }
+}
+
+enCorrectWrong CheckAnswer(stMathMatter MathMatter)
+{
+    if (MathMatter.YourAnswer == MathMatter.CorrectAnswer)
+        return enCorrectWrong::Correct;
+    else
+        return enCorrectWrong::Wrong;
+}
+
+int GetQNumbers(enQuestionLevel QsLevel)
+{
+    switch (QsLevel)
+    {
+    case enQuestionLevel::Easy:
+        return GetRandomNumber(1, 10);
+    case enQuestionLevel::Mid:
+        return GetRandomNumber(10, 50);
+    case enQuestionLevel::Hard:
+        return GetRandomNumber(50, 100);
+    default:
+        return GetRandomNumber(1, 10);
+    }
+}
+
+void Ask(short Question, short HowManyQuestion, stMathMatter QuestionParts)
+{
+    cout << "\nQuestion [" << Question << "/" << HowManyQuestion << "]\n" << endl;
+    cout << QuestionParts.FirstPart << endl;
+    cout << QuestionParts.SecondPart << " " << OperationtypeSymbol(QuestionParts.OperationType) << endl;
+    cout << "_________" << endl;
+}
+
+void SetRightScreenColor(enCorrectWrong Answer)
+{
+    if (Answer == enCorrectWrong::Correct)
+        system("color 2F"); // Green screen for correct
+    else
+        system("color 4F"); // Red screen for wrong
+}
+
+enPassFail CheckPassFail(stGameResult GameResult)
+{
+    if (GameResult.NumberOfCorrectAnswers >= GameResult.NumberOfWrongAnswers)
+        return enPassFail::Pass;
+    else
+        return enPassFail::Fail;
+}
+
+void PrintPassFail(enPassFail PassFail)
+{
+    cout << "\n_____________________________\n" << endl;
+    if (PassFail == enPassFail::Pass)
+    {
+        cout << "Final Result is PASS :-)" << endl;
+    }
+    else
+    {
+        cout << "Final Result is FAIL :-(" << endl;
+    }
+    cout << "_____________________________\n" << endl;
+}
+
+void PrintFinalResult(stGameResult GameDetails)
+{
+    PrintPassFail(GameDetails.PassFail);
+    cout << "Number of Questions: " << GameDetails.NumberOfQuestions << endl; 
+    cout << "Questions Level    : " << QuestionLevelName(GameDetails.QuestionLevel) << endl; 
+    cout << "Operation Type     : " << OperationTypeName(GameDetails.OperationType) << endl;
+    cout << "Number of Correct  : " << GameDetails.NumberOfCorrectAnswers << endl;
+    cout << "Number of Wrong    : " << GameDetails.NumberOfWrongAnswers << endl;
+    cout << "______________________________\n" << endl;
+
+    SetRightScreenColor(GameDetails.PassFail == enPassFail::Pass ? enCorrectWrong::Correct : enCorrectWrong::Wrong);
+}
+
+char PlayAgainChoice()
+{
+    char PlayAgain = 'Y';
+    cout << "Do You Want To Play Again? Y/N? ";
+    cin >> PlayAgain;
+    return PlayAgain;
+}
+
+void StartGame()
+{
+    stMathMatter QuestionParts;
+    stGameResult FinalResult;
+    char playAgain = 'Y';
+
+    do
+    {
+        ResetScreen();
+        FinalResult.NumberOfQuestions = ReadHowManyQuestion();
+        FinalResult.QuestionLevel = ReadQuestionLevel();
+        FinalResult.OperationType = ReadOperationType();
+        
+        FinalResult.NumberOfCorrectAnswers = 0;
+        FinalResult.NumberOfWrongAnswers = 0;
+
+        for (short i = 1; i <= FinalResult.NumberOfQuestions; i++)
+        {
+            // Set question difficulty level
+            QuestionParts.QuestionLevel = (FinalResult.QuestionLevel == enQuestionLevel::MixLevelChoice) ? MixLevel() : FinalResult.QuestionLevel;
+            
+            // Set operation type
+            QuestionParts.OperationType = (FinalResult.OperationType == enOperationType::Mix) ? MixChoice() : FinalResult.OperationType;
+
+            QuestionParts.FirstPart = GetQNumbers(QuestionParts.QuestionLevel);
+            QuestionParts.SecondPart = GetQNumbers(QuestionParts.QuestionLevel);
+
+            // Avoid division by zero
+            if (QuestionParts.OperationType == enOperationType::Div && QuestionParts.SecondPart == 0)
+            {
+                QuestionParts.SecondPart = 1;
+            }
+
+            QuestionParts.CorrectAnswer = QuestionRightAnswer(QuestionParts);
+
+            Ask(i, FinalResult.NumberOfQuestions, QuestionParts);
+            QuestionParts.YourAnswer = ReadAnswer();
+            QuestionParts.CorrectWrong = CheckAnswer(QuestionParts);
+
+            SetRightScreenColor(QuestionParts.CorrectWrong);
+
+            if (QuestionParts.CorrectWrong == enCorrectWrong::Correct) 
+            { 
+                cout << "Right Answer :-)\n";
+                FinalResult.NumberOfCorrectAnswers++; 
+            }
+            else 
+            { 
+                cout << "Wrong Answer :-(\n";
+                cout << "The right answer is: " << QuestionParts.CorrectAnswer << "\n";
+                FinalResult.NumberOfWrongAnswers++; 
+            }
+        }
+
+        FinalResult.PassFail = CheckPassFail(FinalResult);
+        PrintFinalResult(FinalResult);
+        playAgain = PlayAgainChoice();
+
+    } while (playAgain == 'Y' || playAgain == 'y');
+
+    system("color 0F"); // Reset terminal color
+    cout << "\nThanks for playing!\n" << endl;
+}
+
+int main()
+{
+    srand((unsigned)time(NULL));
+    StartGame();
+    return 0;
+}
